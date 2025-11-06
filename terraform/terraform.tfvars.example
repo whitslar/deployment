@@ -1,0 +1,54 @@
+# AWS Configuration
+aws_region        = "us-east-2"
+availability_zone = "us-east-2a"
+
+# Network Configuration
+# Option 1: Create a new VPC (recommended for new deployments)
+create_vpc  = true
+vpc_cidr    = "10.0.0.0/16"
+subnet_cidr = "10.0.1.0/24"
+
+# Option 2: Use existing VPC (set create_vpc = false and provide IDs)
+# create_vpc = false
+# vpc_id     = "vpc-xxxxxxxxx"
+# subnet_id  = "subnet-xxxxxxxxx"
+
+# EC2 Configuration
+instance_type = "t3.large"
+key_name      = "your-ssh-key-name"
+
+# Project Configuration
+project_name = "kerberos-microk8s"
+
+# Storage Configuration
+storage_size_gb = 10
+storage_path    = "/media/storage"
+
+# Security Configuration
+allowed_cidr_blocks     = ["0.0.0.0/0"]  # Restrict this in production!
+allowed_ssh_cidr_blocks = ["0.0.0.0/0"]  # Restrict this in production!
+use_elastic_ip          = true
+
+# Application Credentials (CHANGE THESE!)
+mongodb_password  = "your-secure-mongodb-password"
+rabbitmq_username = "yourusername"
+rabbitmq_password = "your-secure-rabbitmq-password"
+minio_access_key  = "minio"
+minio_secret_key  = "your-secure-minio-secret"
+vault_username    = "root"
+vault_password    = "your-secure-vault-password"
+turn_username     = "username1"
+turn_password     = "your-secure-turn-password"
+
+# Tags
+tags = {
+  Project     = "Kerberos.io"
+  ManagedBy   = "Terraform"
+  Environment = "production"
+  CostCenter  = "security-operations"
+  Owner       = "your-name"
+}
+
+# Environment and Cost Center
+environment = "production"
+cost_center = "security-operations"

@@ -19,6 +19,8 @@ global:
   ##
   imagePullSecrets: []
   storageClass: "openebs-hostpath"
+  security: 
+    allowInsecureImages: true
 ## @section RabbitMQ Image parameters
 ## Bitnami RabbitMQ image version
 ## ref: https://hub.docker.com/r/bitnami/rabbitmq/tags/
@@ -32,7 +34,7 @@ global:
 ##
 image:
   registry: docker.io
-  repository: bitnami/rabbitmq
+  repository: bitnamilegacy/rabbitmq
   tag: 3.12.13-debian-12-r2
   digest: ""
   ## set to true if you would like to see extra information on logs
@@ -1438,7 +1440,7 @@ volumePermissions:
   ##
   image:
     registry: docker.io
-    repository: bitnami/os-shell
+    repository: bitnamilegacy/os-shell
     tag: 12-debian-12-r16
     digest: ""
     ## Specify a imagePullPolicy
