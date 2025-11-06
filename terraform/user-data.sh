@@ -8,6 +8,17 @@ exec 2>&1
 echo "=== Starting Kerberos.io MicroK8s deployment ==="
 echo "Timestamp: $(date)"
 
+# Create Kerberos CLI tool
+echo "=== Creating Kerberos CLI tool ==="
+cat > /usr/local/bin/kerberos <<'EOFCLI'
+#!/bin/bash
+# Kerberos.io MicroK8s Management CLI - See full content in terraform/kerberos-cli.sh
+# This is a placeholder - the full script will be copied during deployment
+echo "Kerberos CLI not yet installed. Run: sudo /home/ubuntu/install-kerberos-cli.sh"
+EOFCLI
+
+chmod +x /usr/local/bin/kerberos
+
 # Update system
 echo "=== Updating system packages ==="
 export DEBIAN_FRONTEND=noninteractive
@@ -117,40 +128,22 @@ sleep 30
 echo "=== Running Kerberos.io deployment ==="
 chmod +x configure.sh
 
-# Create a modified kustomization with proper credentials
-cat > /tmp/kustomization-patch.yaml <<EOF
-helmCharts:
-  - name: hub
-    valuesInline:
-      mqtt:
-        username: "${rabbitmq_username}"
-        password: "${rabbitmq_password}"
-      turn:
-        host: "turn:$INSTANCE_IP:8443"
-        username: "${turn_username}"
-        password: "${turn_password}"
-      mongodb:
-        password: "${mongodb_password}"
-  - name: mongodb
-    valuesInline:
-      auth:
-        rootPassword: "${mongodb_password}"
-  - name: rabbitmq
-    valuesInline:
-      auth:
-        username: "${rabbitmq_username}"
-        password: "${rabbitmq_password}"
-EOF
+# Update the kustomization overlay with actual credentials
+echo "=== Updating kustomization overlay with credentials ==="
+sed -i "s/localhost/$INSTANCE_IP/g" overlays/microk8s/kustomization.yaml
+sed -i "s/yourusername/${rabbitmq_username}/g" overlays/microk8s/kustomization.yaml
+sed -i "s/yourpassword/${rabbitmq_password}/g" overlays/microk8s/kustomization.yaml
+sed -i "s/username1/${turn_username}/g" overlays/microk8s/kustomization.yaml
+sed -i "s/password1/${turn_password}/g" overlays/microk8s/kustomization.yaml
 
-# Update MongoDB password in configmap
+# Also update MongoDB password in the overlay
+sed -i "s/password: \"yourpassword\"/password: \"${mongodb_password}\"/g" overlays/microk8s/kustomization.yaml
+
+# Update MongoDB password in configmaps (for Vault and Factory)
 sed -i "s/yourmongodbpassword/${mongodb_password}/g" base/vault/mongodb-configmap.yaml
 sed -i "s/yourmongodbpassword/${mongodb_password}/g" base/factory/mongodb-configmap.yaml
 
-# Update RabbitMQ credentials in values
-sed -i "s/yourusername/${rabbitmq_username}/g" base/rabbitmq/rabbitmq-values.yaml
-sed -i "s/yourpassword/${rabbitmq_password}/g" base/rabbitmq/rabbitmq-values.yaml
-
-# Update Vault credentials
+# Update Vault credentials in deployment
 sed -i "s/value: \"root\"/value: \"${vault_username}\"/g" base/vault/kerberos-vault-deployment.yaml
 sed -i "s/value: \"kerberos\"/value: \"${vault_password}\"/g" base/vault/kerberos-vault-deployment.yaml
 
